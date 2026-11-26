@@ -1,0 +1,591 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kawaii Dino Phonics World</title>
+<style>
+:root{
+  --pink:#ffb6d9;--purple:#c8b5ff;--blue:#a8e5ff;
+  --yellow:#fff0a8;--ink:#493b61;--white:#fff;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:"Trebuchet MS",Arial,sans-serif;color:var(--ink);
+  background:linear-gradient(135deg,#ffe1f0,#e5dcff,#d9f5ff);
+  min-height:100vh;
+}
+header{
+  text-align:center;padding:22px 12px 12px;
+}
+h1{font-size:clamp(27px,5vw,44px);margin:5px}
+header p{margin:7px}
+nav{
+  display:flex;justify-content:center;gap:8px;flex-wrap:wrap;
+  padding:10px;
+}
+button,select{
+  border:3px solid var(--ink);border-radius:18px;padding:11px 16px;
+  background:white;color:var(--ink);font-weight:bold;font-size:15px;
+  cursor:pointer;box-shadow:0 4px 0 #8d7ba8;
+}
+button:hover{transform:translateY(-2px)}
+button:active{transform:translateY(2px);box-shadow:0 1px 0 #8d7ba8}
+button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.active{background:#ffcae5}
+main{max-width:1000px;margin:auto;padding:12px}
+.page{display:none}
+.page.show{display:block}
+.panel{
+  background:#ffffffdf;border:3px solid white;border-radius:28px;
+  padding:22px;margin:12px auto;max-width:850px;
+  box-shadow:0 7px 18px #7865a522;
+}
+.center{text-align:center}
+.big{font-size:25px;font-weight:bold}
+.small{font-size:14px;opacity:.8}
+select{max-width:100%;margin:8px}
+.stats{
+  display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:12px;
+}
+.stat{background:#fff;border:2px solid #e8d8ff;border-radius:16px;padding:10px 16px}
+.dino-stage{
+  min-height:250px;display:flex;align-items:center;justify-content:center;
+  margin:12px auto;max-width:360px;
+}
+.dino-art{width:min(100%,330px);height:auto;filter:drop-shadow(0 7px 4px #66508030)}
+.egg{font-size:110px;animation:wobble 1.5s infinite ease-in-out}
+@keyframes wobble{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+.question{
+  font-size:clamp(22px,4vw,32px);font-weight:bold;margin:18px 0;
+}
+.mic-status{padding:10px;background:#f4edff;border-radius:14px;margin:12px}
+.transcript{min-height:28px;font-weight:bold;color:#7657a8}
+.answer-input{font-size:22px;text-align:center;width:min(90%,360px);padding:12px;border-radius:15px;border:3px solid #d6c4ff}
+.progress{height:15px;background:#eee;border-radius:20px;overflow:hidden;margin:15px}
+.progress div{height:100%;background:linear-gradient(90deg,#ff9cc9,#b59aff,#7ddcff);width:0%;transition:.3s}
+.feedback{font-size:20px;font-weight:bold;min-height:32px;margin:10px}
+.stars{font-size:35px;letter-spacing:5px}
+.collection-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
+.dino-card{background:white;border:2px solid #eadfff;border-radius:20px;padding:10px;text-align:center}
+.dino-card svg{width:100%;max-width:145px}
+.locked{filter:grayscale(1);opacity:.35}
+.section-title{border-radius:16px;padding:10px;margin:22px 0 12px;background:#fff}
+.hidden{display:none!important}
+footer{text-align:center;padding:25px;font-size:13px}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="font-size:35px">🌈 🦖 🥚 ⭐</div>
+  <h1>Kawaii Dino Phonics World</h1>
+  <p>Learn your sounds, earn stars and hatch adorable dinosaurs!</p>
+</header>
+
+<nav>
+  <button class="active" data-page="home" onclick="showPage('home',this)">🏠 Home</button>
+  <button data-page="exercise" onclick="startExercise(1)">🌸 Exercise 1</button>
+  <button data-page="exercise" onclick="startExercise(2)">🦕 Exercise 2</button>
+  <button data-page="collection" onclick="showPage('collection',this)">📚 Dino Collection</button>
+</nav>
+
+<main>
+<section id="home" class="page show">
+  <div class="panel center">
+    <div class="big">Welcome to Dino Land! 💖</div>
+    <p>Choose your age group to get suitable questions.</p>
+    <label for="ageSelect"><b>Your age group:</b></label><br>
+    <select id="ageSelect">
+      <option value="3-5">3–5 years</option>
+      <option value="6-8" selected>6–8 years</option>
+      <option value="9-12">9–12 years</option>
+      <option value="13-17">13–17 years</option>
+    </select>
+    <div class="dino-stage" id="homeDino"></div>
+    <div class="stats">
+      <div class="stat">⭐ Stars: <b id="homeStars">0</b></div>
+      <div class="stat">🥚 Eggs: <b id="homeEggs">0</b></div>
+      <div class="stat">🦖 Dinosaurs: <b id="homeDinos">0</b>/20</div>
+    </div>
+    <p>Complete an exercise to earn stars!</p>
+    <button onclick="startExercise(1)">START EXERCISE 1 🌸</button>
+    <button onclick="startExercise(2)">START EXERCISE 2 🌈</button>
+  </div>
+  <div class="panel center">
+    <h2>⭐ How to earn rewards</h2>
+    <p>10 correct answers = ⭐⭐⭐</p>
+    <p>9 correct answers = ⭐⭐</p>
+    <p>8 correct answers = ⭐</p>
+    <p>Every 20 stars earns one mystery egg!</p>
+  </div>
+  <div class="panel center">
+    <h2>🥚 Your mystery eggs</h2>
+    <div class="egg" id="homeEgg">🥚</div>
+    <p id="eggMessage">Complete exercises to collect stars and earn eggs!</p>
+    <button id="hatchButton" onclick="hatchEgg()" disabled>HATCH EGG!</button>
+  </div>
+</section>
+
+<section id="exercise" class="page">
+  <div class="panel center">
+    <h2 id="exerciseTitle">🌸 Exercise 1</h2>
+    <div class="stats">
+      <div class="stat">Question <b id="questionNumber">1</b>/10</div>
+      <div class="stat">Correct <b id="correctCount">0</b></div>
+    </div>
+    <div class="progress"><div id="progressBar"></div></div>
+    <div class="dino-stage" id="questionDino"></div>
+    <div class="small" id="questionType">PHONICS</div>
+    <div class="question" id="questionText">Get ready!</div>
+
+    <div id="spokenArea">
+      <button id="micButton" onclick="listen()">🎤 START MICROPHONE</button>
+      <button onclick="resetListening()">🔁 TRY AGAIN</button>
+      <div class="mic-status" id="micStatus">Press the microphone and say your answer.</div>
+      <div class="transcript" id="transcript"></div>
+      <button onclick="checkSpokenAnswer()">CHECK ANSWER 💗</button>
+    </div>
+
+    <div id="spellingArea" class="hidden">
+      <p>Listen carefully and type the word you hear.</p>
+      <button onclick="speakSpellingWord()">🔊 HEAR THE WORD</button><br><br>
+      <input class="answer-input" id="spellingInput" placeholder="Type your spelling">
+      <br><br>
+      <button onclick="checkSpellingAnswer()">CHECK SPELLING 💗</button>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+    <button id="nextButton" class="hidden" onclick="nextQuestion()">NEXT QUESTION ➜</button>
+    <button onclick="showPage('home')">🏠 HOME</button>
+  </div>
+</section>
+
+<section id="result" class="page">
+  <div class="panel center">
+    <h2>🎉 Exercise completed!</h2>
+    <div class="stars" id="resultStars"></div>
+    <div class="big" id="resultScore"></div>
+    <p id="resultMessage"></p>
+    <div class="dino-stage" id="resultDino"></div>
+    <p id="resultReward"></p>
+    <button onclick="startExercise(1)">EXERCISE 1</button>
+    <button onclick="startExercise(2)">EXERCISE 2</button>
+    <button onclick="showPage('collection')">VIEW MY DINOS 🦖</button>
+    <button onclick="showPage('home')">HOME 🏠</button>
+  </div>
+</section>
+
+<section id="collection" class="page">
+  <div class="panel center">
+    <h2>🌈 My Dinosaur Collection</h2>
+    <p>Collect all 20 cute dinosaurs!</p>
+    <div class="stats">
+      <div class="stat">⭐ <b id="collectionStars">0</b> stars</div>
+      <div class="stat">🥚 <b id="collectionEggs">0</b> eggs</div>
+      <div class="stat">🦖 <b id="collectionCount">0</b>/20 collected</div>
+    </div>
+  </div>
+  <div id="collectionContent"></div>
+  <div class="panel center">
+    <div class="egg">🥚</div>
+    <p id="collectionEggMessage"></p>
+    <button id="collectionHatchButton" onclick="hatchEgg()">HATCH EGG!</button>
+  </div>
+</section>
+</main>
+
+<footer>Made with 💗 for little learners and dinosaur lovers!</footer>
+
+<script>
+// -------------------- DINOSAUR ART --------------------
+// Original colourful vector-style dinosaur illustrations.
+const dinos = [
+{name:"Rainbow Triceratops",cat:"Magic",color:"#ff9fcf",accent:"#75d9f7",kind:"horn"},
+{name:"Cotton Candy Rex",cat:"Magic",color:"#ffa5d6",accent:"#ffe66f",kind:"rex"},
+{name:"Sparkle Stegosaurus",cat:"Magic",color:"#b8a5ff",accent:"#ffda72",kind:"plates"},
+{name:"Rainbow Brachiosaurus",cat:"Magic",color:"#ffb1ce",accent:"#80dfff",kind:"long"},
+{name:"Galaxy Ankylosaurus",cat:"Magic",color:"#b9a4ff",accent:"#7ee6d2",kind:"shell"},
+{name:"Twinkle Parasaur",cat:"Magic",color:"#ffc1e3",accent:"#9ee8ff",kind:"crest"},
+{name:"Candy Spinosaurus",cat:"Magic",color:"#ff9fc4",accent:"#75d8ed",kind:"sail"},
+{name:"Starry Pterodactyl",cat:"Magic",color:"#a9dfff",accent:"#ffb1d8",kind:"wings"},
+{name:"Peachy Pachy",cat:"Magic",color:"#ffc0a5",accent:"#ffe17e",kind:"dome"},
+{name:"Unicorn Dino",cat:"Magic",color:"#ffb5ed",accent:"#8fe3f6",kind:"horn"},
+{name:"Minty Raptor",cat:"Normal",color:"#a8e6c0",accent:"#ffcf8b",kind:"rex"},
+{name:"Blueberry Stego",cat:"Normal",color:"#9ccaff",accent:"#d7b4ff",kind:"plates"},
+{name:"Sunny Bronto",cat:"Normal",color:"#ffe18e",accent:"#ffb2cb",kind:"long"},
+{name:"Lavender Ankyl",cat:"Normal",color:"#c4afff",accent:"#8de4d1",kind:"shell"},
+{name:"Peachy Dino",cat:"Normal",color:"#ffb69d",accent:"#ffe18e",kind:"crest"},
+{name:"Ocean Spino",cat:"Normal",color:"#82d8ed",accent:"#ffb4d2",kind:"sail"},
+{name:"Little Trike",cat:"Normal",color:"#a9dfa8",accent:"#ffcb8b",kind:"horn"},
+{name:"Silly Noodle",cat:"Silly",color:"#b7a2ef",accent:"#ffb5cf",kind:"long"},
+{name:"Wobbly Rex",cat:"Silly",color:"#ffbb83",accent:"#9edfff",kind:"rex"},
+{name:"Tiny Blobosaurus",cat:"Silly",color:"#ff9fcf",accent:"#a9e8c8",kind:"dome"}
+];
+
+function dinoSVG(d,idx=0){
+ const id="grad"+idx;
+ let extras="";
+ if(d.kind==="horn") extras=`
+   <path d="M91 112 Q58 76 47 36 Q88 53 111 103" fill="#fff" stroke="#17121e" stroke-width="8" stroke-linejoin="round"/>
+   <path d="M150 91 Q160 64 178 57 Q183 85 166 108" fill="#fff" stroke="#17121e" stroke-width="7"/>`;
+ if(d.kind==="plates") extras=`
+   <path d="M92 105 L100 65 L124 99 L139 54 L158 100 L180 70 L190 116" fill="${d.accent}" stroke="#17121e" stroke-width="7" stroke-linejoin="round"/>`;
+ if(d.kind==="shell") extras=`
+   <path d="M72 138 Q115 48 195 117 Q216 143 190 181 Q118 213 73 169Z" fill="${d.accent}" stroke="#17121e" stroke-width="8"/>
+   <path d="M105 116L137 176 M151 105L168 169" stroke="#fff" stroke-width="5" opacity=".65"/>`;
+ if(d.kind==="crest") extras=`
+   <path d="M126 91 Q112 37 154 40 Q192 47 176 105" fill="${d.accent}" stroke="#17121e" stroke-width="8"/>`;
+ if(d.kind==="sail") extras=`
+   <path d="M92 115 Q100 43 139 44 Q169 55 188 119Z" fill="${d.accent}" stroke="#17121e" stroke-width="8"/>`;
+ if(d.kind==="dome") extras=`
+   <path d="M102 106 Q106 39 148 47 Q185 48 190 110Z" fill="${d.accent}" stroke="#17121e" stroke-width="8"/>`;
+ if(d.kind==="long") extras=`
+   <path d="M175 130 Q231 101 237 62 Q250 36 260 61 Q265 109 198 158" fill="none" stroke="#17121e" stroke-width="18" stroke-linecap="round"/>
+   <path d="M175 130 Q231 101 237 62 Q250 36 260 61 Q265 109 198 158" fill="none" stroke="${d.color}" stroke-width="10" stroke-linecap="round"/>`;
+ if(d.kind==="wings") extras=`
+   <path d="M103 123 Q42 33 17 85 Q43 143 107 164Z" fill="${d.accent}" stroke="#17121e" stroke-width="8"/>
+   <path d="M178 119 Q231 31 263 77 Q241 144 179 164Z" fill="${d.accent}" stroke="#17121e" stroke-width="8"/>`;
+ if(d.kind==="rex") extras=`
+   <path d="M73 156 Q32 151 28 176 Q58 192 89 178" fill="none" stroke="#17121e" stroke-width="9" stroke-linecap="round"/>
+   <path d="M166 170L183 181L169 192" fill="none" stroke="#17121e" stroke-width="8" stroke-linecap="round"/>`;
+ const body = d.kind==="long"
+ ? `<path d="M91 117 Q108 77 151 88 Q177 91 190 123 Q211 152 187 189 L164 190 L159 157 L137 157 L131 193 L105 193 L105 157 Q76 157 72 138Z"/>`
+ : `<path d="M75 139 Q72 101 110 91 Q145 78 178 100 Q213 119 203 158 Q199 184 177 189 L164 189 L160 158 L139 158 L132 194 L106 194 L104 158 Q76 165 75 139Z"/>`;
+ return `<svg class="dino-art" viewBox="0 0 280 220" role="img" aria-label="${d.name}">
+ <defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">
+ <stop offset="0" stop-color="${d.color}"/><stop offset=".52" stop-color="${d.accent}"/><stop offset="1" stop-color="#ffe98b"/>
+ </linearGradient></defs>
+ <path d="M75 139 Q72 101 110 91 Q145 78 178 100 Q213 119 203 158 Q199 184 177 189 L164 189 L160 158 L139 158 L132 194 L106 194 L104 158 Q76 165 75 139Z"
+ fill="white" stroke="white" stroke-width="22" stroke-linejoin="round"/>
+ ${extras}
+ <path d="${d.kind==="long"?"M92 117 Q108 77 151 88 Q177 91 190 123 Q211 152 187 189 L164 190 L159 157 L137 157 L131 193 L105 193 L105 157 Q76 157 72 138Z":"M75 139 Q72 101 110 91 Q145 78 178 100 Q213 119 203 158 Q199 184 177 189 L164 189 L160 158 L139 158 L132 194 L106 194 L104 158 Q76 165 75 139Z"}"
+ fill="url(#${id})" stroke="#17121e" stroke-width="9" stroke-linejoin="round"/>
+ <path d="M78 129 Q55 100 70 83 Q90 65 116 91 Q134 105 126 129 Q112 149 91 144Z"
+ fill="url(#${id})" stroke="#17121e" stroke-width="8"/>
+ <path d="M91 194 Q98 180 112 190 L120 201 L91 201Z" fill="#fff" stroke="#17121e" stroke-width="6"/>
+ <path d="M148 193 Q159 180 173 191 L180 201 L148 201Z" fill="#fff" stroke="#17121e" stroke-width="6"/>
+ <ellipse cx="103" cy="111" rx="17" ry="22" fill="#17121e"/>
+ <ellipse cx="98" cy="104" rx="6" ry="8" fill="white"/>
+ <ellipse cx="109" cy="119" rx="4" ry="5" fill="white"/>
+ <ellipse cx="82" cy="143" rx="12" ry="8" fill="#ff85b8" opacity=".8"/>
+ <path d="M85 151 Q96 160 108 150" fill="none" stroke="#17121e" stroke-width="4" stroke-linecap="round"/>
+ <path d="M145 100 Q165 91 178 104" fill="none" stroke="#17121e" stroke-width="4" stroke-linecap="round"/>
+ <circle cx="155" cy="132" r="5" fill="#fff" opacity=".8"/>
+ <circle cx="174" cy="145" r="4" fill="#fff" opacity=".8"/>
+ </svg>`;
+}
+
+// -------------------- QUESTIONS --------------------
+const questionSets={
+"3-5":{
+1:[
+["p","Say the sound: BR","br","b r,bruh"],
+["p","Say the sound: TR","tr","t r,truh"],
+["p","Say the sound: SH","sh","shh"],
+["v","Say the word: apple","apple","apples"],
+["v","Say the word: egg","egg","eg"],
+["s","Say this sentence: I see a cat.","i see a cat","i see cat"],
+["s","Say this sentence: The sun is hot.","the sun is hot","sun is hot"],
+["w","Spell the word: cat","cat"],
+["w","Spell the word: dog","dog"],
+["w","Spell the word: sun","sun"]],
+2:[
+["p","Say the sound: CL","cl","c l,cluh"],
+["p","Say the sound: PL","pl","p l,pluh"],
+["p","Say the sound: CH","ch","chh"],
+["v","Say the word: orange","orange","oranges"],
+["v","Say the word: umbrella","umbrella","umbrellas"],
+["s","Say this sentence: I like cake.","i like cake","i like the cake"],
+["s","Say this sentence: My dog can run.","my dog can run","my dog runs"],
+["w","Spell the word: hat","hat"],
+["w","Spell the word: pig","pig"],
+["w","Spell the word: cup","cup"]]},
+"6-8":{
+1:[
+["p","Say the sound: PR","pr","p r,pruh"],
+["p","Say the sound: BR","br","b r,bruh"],
+["p","Say the sound: TH","th","thh"],
+["v","Say the word: train","train","trains"],
+["v","Say the word: flower","flower","flowers"],
+["s","Say this sentence: The little bird can fly.","the little bird can fly","little bird can fly"],
+["s","Say this sentence: I enjoy reading books.","i enjoy reading books","i enjoy reading a book"],
+["w","Spell the word: garden","garden"],
+["w","Spell the word: yellow","yellow"],
+["w","Spell the word: rabbit","rabbit"]],
+2:[
+["p","Say the sound: GR","gr","g r,gruh"],
+["p","Say the sound: FL","fl","f l,fluh"],
+["p","Say the sound: CH","ch","chh"],
+["v","Say the word: sunshine","sunshine","sun shine"],
+["v","Say the word: rainbow","rainbow","rain bow"],
+["s","Say this sentence: The dinosaur is friendly.","the dinosaur is friendly","dinosaur is friendly"],
+["s","Say this sentence: We play outside every day.","we play outside every day","we play outside"],
+["w","Spell the word: butterfly","butterfly"],
+["w","Spell the word: window","window"],
+["w","Spell the word: picnic","picnic"]]},
+"9-12":{
+1:[
+["p","Say the sound: STR","str","s t r"],
+["p","Say the sound: SCR","scr","s c r"],
+["p","Say the sound: PH","ph","f"],
+["v","Say the word: adventure","adventure","adventures"],
+["v","Say the word: beautiful","beautiful","beautyful"],
+["s","Say this sentence: The curious explorer discovered a hidden cave.","the curious explorer discovered a hidden cave","curious explorer discovered a hidden cave"],
+["s","Say this sentence: Learning new words can be exciting.","learning new words can be exciting","learning words can be exciting"],
+["w","Spell the word: mysterious","mysterious"],
+["w","Spell the word: important","important"],
+["w","Spell the word: discovery","discovery"]],
+2:[
+["p","Say the sound: SPL","spl","s p l"],
+["p","Say the sound: SHR","shr","s h r"],
+["p","Say the sound: KN","kn","n"],
+["v","Say the word: imagination","imagination","imaginashun"],
+["v","Say the word: wonderful","wonderful","wonderfull"],
+["s","Say this sentence: A healthy habit can make a big difference.","a healthy habit can make a big difference","healthy habits make a big difference"],
+["s","Say this sentence: The scientist carefully observed the experiment.","the scientist carefully observed the experiment","scientist carefully observed the experiment"],
+["w","Spell the word: environment","environment"],
+["w","Spell the word: knowledge","knowledge"],
+["w","Spell the word: celebrate","celebrate"]]},
+"13-17":{
+1:[
+["p","Say the sound: STR","str","s t r"],
+["p","Say the sound: THR","thr","t h r"],
+["p","Say the sound: TCH","tch","ch"],
+["v","Say the word: responsibility","responsibility","responsibilities"],
+["v","Say the word: extraordinary","extraordinary","extra ordinary"],
+["s","Say this sentence: Consistent practice helps improve communication skills.","consistent practice helps improve communication skills","practice helps improve communication skills"],
+["s","Say this sentence: Every challenge is an opportunity to learn something new.","every challenge is an opportunity to learn something new","every challenge is an opportunity to learn"],
+["w","Spell the word: perseverance","perseverance"],
+["w","Spell the word: pronunciation","pronunciation"],
+["w","Spell the word: achievement","achievement"]],
+2:[
+["p","Say the sound: SQU","squ","s q u"],
+["p","Say the sound: SPR","spr","s p r"],
+["p","Say the sound: DGE","dge","j"],
+["v","Say the word: communication","communication","communications"],
+["v","Say the word: vocabulary","vocabulary","vocabularies"],
+["s","Say this sentence: Reading regularly can strengthen language skills.","reading regularly can strengthen language skills","reading can strengthen language skills"],
+["s","Say this sentence: Creativity allows people to explore different perspectives.","creativity allows people to explore different perspectives","creativity explores different perspectives"],
+["w","Spell the word: independent","independent"],
+["w","Spell the word: opportunity","opportunity"],
+["w","Spell the word: appreciate","appreciate"]]}
+};
+
+let currentExercise=1,questions=[],qIndex=0,correct=0,answered=false,spokenText="";
+let recognition=null;
+let save={stars:0,eggs:0,unlocked:[],eggsCreated:0};
+const STORAGE_KEY="kawaiiDinoWorldRainbow2026";
+
+function loadSave(){
+ try{
+  const old=JSON.parse(localStorage.getItem(STORAGE_KEY));
+  if(old)save={...save,...old};
+ }catch(e){}
+}
+function persist(){localStorage.setItem(STORAGE_KEY,JSON.stringify(save))}
+function showPage(id,btn){
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("show"));
+ document.getElementById(id).classList.add("show");
+ document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+ if(btn)btn.classList.add("active");
+ updateUI();
+}
+function updateUI(){
+ ["homeStars","collectionStars"].forEach(id=>document.getElementById(id).textContent=save.stars);
+ ["homeEggs","collectionEggs"].forEach(id=>document.getElementById(id).textContent=save.eggs);
+ ["homeDinos","collectionCount"].forEach(id=>document.getElementById(id).textContent=save.unlocked.length);
+ document.getElementById("hatchButton").disabled=save.eggs<1;
+ document.getElementById("collectionHatchButton").disabled=save.eggs<1;
+ document.getElementById("eggMessage").textContent=save.eggs?`You have ${save.eggs} mystery egg(s)! Hatch one!`:"Earn 20 stars to get a mystery egg!";
+ document.getElementById("collectionEggMessage").textContent=save.eggs?`You have ${save.eggs} egg(s) waiting to hatch!`:"No eggs yet. Keep learning!";
+ renderCollection();
+}
+function startExercise(num){
+ currentExercise=num;
+ const age=document.getElementById("ageSelect").value;
+ questions=questionSets[age][num].map(q=>({type:q[0],prompt:q[1],answer:q[2],aliases:q[3]||""}));
+ qIndex=0;correct=0;
+ document.getElementById("exerciseTitle").textContent=`🌸 Exercise ${num}`;
+ showPage("exercise");
+ displayQuestion();
+}
+function displayQuestion(){
+ answered=false;spokenText="";
+ const q=questions[qIndex];
+ document.getElementById("questionNumber").textContent=qIndex+1;
+ document.getElementById("correctCount").textContent=correct;
+ document.getElementById("progressBar").style.width=(qIndex*10)+"%";
+ document.getElementById("questionText").textContent=q.prompt;
+ document.getElementById("questionType").textContent=
+ q.type==="p"?"🔤 PHONICS":q.type==="v"?"🍎 VOWELS":q.type==="s"?"💬 SENTENCE":"✏️ SPELLING";
+ document.getElementById("spokenArea").classList.toggle("hidden",q.type==="w");
+ document.getElementById("spellingArea").classList.toggle("hidden",q.type!=="w");
+ document.getElementById("feedback").textContent="";
+ document.getElementById("transcript").textContent="";
+ document.getElementById("micStatus").textContent="Press the microphone and say your answer.";
+ document.getElementById("spellingInput").value="";
+ document.getElementById("nextButton").classList.add("hidden");
+ document.getElementById("questionDino").innerHTML=dinoSVG(dinos[(qIndex+currentExercise*3)%dinos.length],qIndex+30);
+ if(q.type==="w")speakSpellingWord();
+}
+function normalise(t){
+ return t.toLowerCase().replace(/[^a-z0-9\s]/g,"").replace(/\s+/g," ").trim();
+}
+function listen(){
+ const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SpeechRecognition){
+  document.getElementById("micStatus").textContent="Speech recognition is not supported here. Please try Google Chrome.";
+  return;
+ }
+ if(recognition){try{recognition.stop()}catch(e){}}
+ recognition=new SpeechRecognition();
+ recognition.lang="en-SG";
+ recognition.continuous=false;
+ recognition.interimResults=true;
+ recognition.onstart=()=>document.getElementById("micStatus").textContent="🎤 Listening... Speak clearly!";
+ recognition.onresult=(event)=>{
+  let text="";
+  for(let i=0;i<event.results.length;i++)text+=event.results[i][0].transcript;
+  spokenText=text;
+  document.getElementById("transcript").textContent="I heard: "+text;
+ };
+ recognition.onerror=(event)=>{
+  document.getElementById("micStatus").textContent="Microphone issue: "+event.error+". Check microphone permission and try again.";
+ };
+ recognition.onend=()=>document.getElementById("micStatus").textContent=spokenText?"Great! Press CHECK ANSWER.":"No speech detected. Please try again.";
+ try{recognition.start()}catch(e){
+  document.getElementById("micStatus").textContent="Please wait a moment and try again.";
+ }
+}
+function resetListening(){
+ spokenText="";
+ document.getElementById("transcript").textContent="";
+ document.getElementById("micStatus").textContent="Ready! Press the microphone to try again.";
+}
+function isCorrect(q,spoken){
+ const heard=normalise(spoken);
+ const answer=normalise(q.answer);
+ const aliases=q.aliases.split(",").map(normalise).filter(Boolean);
+ if(heard===answer||aliases.includes(heard))return true;
+ // Speech recognition sometimes adds small filler words.
+ if(q.type==="s" && heard.length>0){
+  return heard===answer || (heard.length>=answer.length*.82 && answer.includes(heard));
+ }
+ if(q.type==="p"){
+  return heard.replace(/\s/g,"")===answer || aliases.some(a=>heard.replace(/\s/g,"")===a.replace(/\s/g,""));
+ }
+ return false;
+}
+function markAnswer(ok){
+ if(answered)return;
+ answered=true;
+ if(ok){
+  correct++;
+  document.getElementById("feedback").textContent="🌟 Amazing! That's correct!";
+  document.getElementById("feedback").style.color="#159b72";
+ }else{
+  document.getElementById("feedback").textContent="💗 Good try! The answer is: "+questions[qIndex].answer;
+  document.getElementById("feedback").style.color="#bd6395";
+ }
+ document.getElementById("correctCount").textContent=correct;
+ document.getElementById("nextButton").classList.remove("hidden");
+}
+function checkSpokenAnswer(){
+ if(!spokenText){document.getElementById("feedback").textContent="Please use the microphone first! 🎤";return}
+ markAnswer(isCorrect(questions[qIndex],spokenText));
+}
+function speakSpellingWord(){
+ const q=questions[qIndex];
+ if(!q||q.type!=="w")return;
+ if(!("speechSynthesis" in window)){
+  document.getElementById("feedback").textContent="Your browser does not support speech. The word is "+q.answer;
+  return;
+ }
+ speechSynthesis.cancel();
+ const utterance=new SpeechSynthesisUtterance(q.answer);
+ utterance.lang="en-SG";utterance.rate=.8;
+ speechSynthesis.speak(utterance);
+}
+function checkSpellingAnswer(){
+ const typed=normalise(document.getElementById("spellingInput").value);
+ markAnswer(typed===normalise(questions[qIndex].answer));
+}
+function nextQuestion(){
+ if(!answered)return;
+ qIndex++;
+ if(qIndex<10)displayQuestion();
+ else finishExercise();
+}
+function getCategory(score){
+ if(score>=9)return "Magic";
+ if(score>=7)return "Normal";
+ return "Silly";
+}
+function finishExercise(){
+ const stars=correct===10?3:correct===9?2:correct===8?1:0;
+ const oldMilestone=Math.floor(save.stars/20);
+ save.stars+=stars;
+ const newMilestone=Math.floor(save.stars/20);
+ const eggsEarned=newMilestone-oldMilestone;
+ const category=getCategory(correct);
+ for(let i=0;i<eggsEarned;i++)save.eggs++;
+ save.eggsCreated+=eggsEarned;
+ persist();
+ showPage("result");
+ document.getElementById("resultStars").textContent="⭐".repeat(stars)||"☆☆☆";
+ document.getElementById("resultScore").textContent=`You got ${correct} out of 10 correct!`;
+ document.getElementById("resultMessage").textContent=
+ stars?`You earned ${stars} star(s)! Fantastic work!`:"Keep practising. You can do it!";
+ document.getElementById("resultReward").textContent=
+ `Your dinosaur reward category: ${category.toUpperCase()} DINOS`+
+ (eggsEarned?` You also earned ${eggsEarned} mystery egg(s)!`:"");
+ const rewardDino=dinos.find(d=>d.cat===category&&!save.unlocked.includes(d.name));
+ document.getElementById("resultDino").innerHTML=rewardDino?dinoSVG(rewardDino,90):"🥚";
+ updateUI();
+}
+function hatchEgg(){
+ if(save.eggs<1)return;
+ const category="Magic"; // Eggs hatch into the next available dinosaur.
+ let d=dinos.find(x=>!save.unlocked.includes(x.name));
+ if(!d){alert("You collected all 20 dinosaurs! Amazing!");return}
+ save.eggs--;
+ save.unlocked.push(d.name);
+ persist();
+ alert(`🎉 Surprise! You hatched ${d.name}! 🦖`);
+ updateUI();
+}
+function renderCollection(){
+ const root=document.getElementById("collectionContent");
+ if(!root)return;
+ root.innerHTML="";
+ const groups=[
+  {name:"✨ MAGIC DINOS",cat:"Magic"},
+  {name:"🌿 NORMAL DINOS",cat:"Normal"},
+  {name:"🤪 SILLY DINOS",cat:"Silly"}
+ ];
+ groups.forEach(group=>{
+  const heading=document.createElement("h2");
+  heading.className="section-title center";
+  heading.textContent=group.name;
+  root.appendChild(heading);
+  const grid=document.createElement("div");
+  grid.className="collection-grid";
+  dinos.filter(d=>d.cat===group.cat).forEach(d=>{
+   const unlocked=save.unlocked.includes(d.name);
+   const card=document.createElement("div");
+   card.className="dino-card";
+   card.innerHTML=`<div class="${unlocked?"":"locked"}">${dinoSVG(d,dinos.indexOf(d)+100)}</div>
+   <b>${unlocked?d.name:"???"}</b><p class="small">${unlocked?"Collected!":"Mystery dinosaur"}</p>`;
+   grid.appendChild(card);
+  });
+  root.appendChild(grid);
+ });
+}
+loadSave();
+document.getElementById("homeDino").innerHTML=dinoSVG(dinos[0],200);
+updateUI();
+</script>
+</body>
+</html>
